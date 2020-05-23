@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -jar target/apirest.jar -Dserver.port=$PORT
+web: java -Dserver.port=$PORT -jar target/apirest.jar

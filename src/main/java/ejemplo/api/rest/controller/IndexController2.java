@@ -7,11 +7,8 @@ import java.util.Optional;
 import javax.swing.RepaintManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,11 +27,10 @@ import ejemplo.api.rest.repository.UsuarioRepository;
 
 
 
-//@CrossOrigin(origins="")
-
+@CrossOrigin(origins="https://ejemplospringrestapi.herokuapp.com/ejemplospringrestapi/")
 @RestController /*Arquitectura REST*/
-@RequestMapping(value = "/usuario")
-public class IndexController {
+@RequestMapping(value = "/usuario2")
+public class IndexController2 {
 	
 	@Autowired
 	private UsuarioRepository usuarioRepository;
@@ -60,7 +56,6 @@ public class IndexController {
 	/*Restfull*/
 	
 	@GetMapping(value = "/{id}", produces = "application/json")
-	@CachePut("cacheuser")
 	public ResponseEntity<Usuario> init(@PathVariable (value="id") Long id) {
 		
 
@@ -90,7 +85,6 @@ public class IndexController {
 		
 	}
 	
-	@CrossOrigin(origins = "www.google.com")
 	@DeleteMapping(value="/{id}/venta", produces="application/text")
 	public String deleteVenta (@PathVariable ("id") Long id) {
 		
@@ -101,36 +95,16 @@ public class IndexController {
 		
 	}
 	
-	/*Vamos a suponer que se cargue los usario es en un proceso lento
-	 * y queremos controlar eso con cache para agilizar el proceso*/
 	
 	@GetMapping(value="/", produces="application/json")
-	@CachePut("cacheusuarios")
-	public ResponseEntity<List<Usuario>> usuario() throws InterruptedException{
+	public ResponseEntity<List<Usuario>> usuario(){
 		
 		
 		List<Usuario> list = (List<Usuario>)usuarioRepository.findAll();
 		
-		//Thread.sleep(6000);/*Detiene el codigo por 6 segundo, simula proceso lento*/
 		return new  ResponseEntity<List<Usuario>>(list, HttpStatus.OK);
 		
 	}
-	
-	/*END-POINT consulta de user por nombre*/
-	@GetMapping(value="/usuarioPorNombre/{nombre}", produces="application/json")
-	@CachePut("cacheusuarios")
-	public ResponseEntity<List<Usuario>> usuarioPorNombre(@PathVariable("nombre") String nombre) throws InterruptedException{
-		
-		
-		List<Usuario> list = (List<Usuario>)usuarioRepository.findUserByNombre(nombre);
-		
-		//Thread.sleep(6000);/*Detiene el codigo por 6 segundo, simula proceso lento*/
-		return new  ResponseEntity<List<Usuario>>(list, HttpStatus.OK);
-		
-	}
-	
-	
-	
 	
 	
 	@PutMapping (value="/", produces ="application/json")
@@ -144,25 +118,12 @@ public class IndexController {
 			usuario.getTelefonos().get(pos).setUsuario(usuario);
 		}
 		
-		Usuario userTemporario  = usuarioRepository.findById(usuario.getId()).get();
-		
-		if (userTemporario.getPassword().equals(usuario.getPassword())) {
-			String passwordcripografada = new BCryptPasswordEncoder().encode(usuario.getPassword());
-			usuario.setPassword(passwordcripografada);
-			
-		}
-		
 		
 		Usuario usuarioSalvo = usuarioRepository.save(usuario);
 		
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
 	}
 	
-	
-	
-	/*Registro de usuarios nuevos*/
-	/*
-	@CrossOrigin(origins = "www.google.com")
 	@PostMapping (value="/", produces ="application/json")
 	public ResponseEntity<Usuario> registrar(@RequestBody Usuario usuario){
 		
@@ -176,7 +137,7 @@ public class IndexController {
 		
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
 	}
-	*/
+	
 	
 
 	
@@ -207,19 +168,6 @@ public class IndexController {
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
 	}
 	
-	@PostMapping (value="/", produces ="application/json")
-	public ResponseEntity<Usuario> registrarNuevo(@RequestBody Usuario usuario){
-		
-		for(int pos=0; pos < usuario.getTelefonos().size(); pos++) {
-			usuario.getTelefonos().get(pos).setUsuario(usuario);
-		}
-		
-		
-		String passwordcripografada = new BCryptPasswordEncoder().encode(usuario.getPassword());
-		usuario.setPassword(passwordcripografada);
-		
-		Usuario usuarioSalvo = usuarioRepository.save(usuario);
-		
-		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
-	}
+
+	
 }
